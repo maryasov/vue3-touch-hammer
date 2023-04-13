@@ -19,8 +19,14 @@ npm install vue3-touch-hammer
 ```
 
 ```Javascript
-var VueTouch = require('vue-touch')
-Vue.use(VueTouch, {name: 'v-touch'})
+import VueTouch from 'vue3-touch-hammer'
+
+VueTouch.registerCustomEvent('doubletap', {
+  type: 'tap',
+  taps: 2
+})
+
+app.use(VueTouch, {name: 'v-touch'});
 ```
 You can pass an options object as the second argument, which at the moment accepts one property, `name`. It's used to define the name of the component that is registered with Vue and defaults to `'v-touch'`.
 
