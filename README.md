@@ -12,20 +12,17 @@ This is a component wrapper for Hammer.js 2.0.
 
 ### npm
 
-Available through npm as `vue-touch`. As this version is currently in BETA, you have to install with the `next` tag.
+Available through npm as `vue3-touch-hammer`.
 
 ```bash
 npm install vue3-touch-hammer
 ```
 
 ```Javascript
+import { createApp } from 'vue'
 import VueTouch from 'vue3-touch-hammer'
 
-VueTouch.registerCustomEvent('doubletap', {
-  type: 'tap',
-  taps: 2
-})
-
+const app = createApp(App)
 app.use(VueTouch, {name: 'v-touch'});
 ```
 You can pass an options object as the second argument, which at the moment accepts one property, `name`. It's used to define the name of the component that is registered with Vue and defaults to `'v-touch'`.
