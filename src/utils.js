@@ -1,4 +1,4 @@
-import Hammer from 'hammerjs'
+import Hammer from 'hammerjs';
 
 /**
  * Small helper method to generate prop options for all the
@@ -9,13 +9,13 @@ export function createProp() {
   return {
     type: Object,
     default: function () {
-      return {}
-    }
-  }
+      return {};
+    },
+  };
 }
 
 export function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1)
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 /**
@@ -23,7 +23,7 @@ export function capitalize(str) {
  * Will be translated to Hammer-style directions by guardDirections()
  * @type {Array}
  */
-export const directions = ['up', 'down', 'left', 'right', 'horizontal', 'vertical', 'all']
+export const directions = ['up', 'down', 'left', 'right', 'horizontal', 'vertical', 'all'];
 
 /**
  * Translates VueTouch direction names into Hammer Direction numbers.
@@ -31,16 +31,16 @@ export const directions = ['up', 'down', 'left', 'right', 'horizontal', 'vertica
  * @return {Object}         [Hammer Options]
  */
 export function guardDirections(options) {
-  const dir = options.direction
+  const dir = options.direction;
   if (typeof dir === 'string') {
-    const hammerDirection = 'DIRECTION_' + dir.toUpperCase()
+    const hammerDirection = 'DIRECTION_' + dir.toUpperCase();
     if (directions.indexOf(dir) > -1 && Hammer.hasOwnProperty(hammerDirection)) {
-      options.direction = Hammer[hammerDirection]
+      options.direction = Hammer[hammerDirection];
     } else {
-      console.warn('[vue-touch] invalid direction: ' + dir)
+      console.warn('[vue-touch] invalid direction: ' + dir);
     }
   }
-  return options
+  return options;
 }
 
 /**
@@ -48,7 +48,7 @@ export function guardDirections(options) {
  * see index.js -> vueTouch.config
  * @type {Object}
  */
-export const config = {}
+export const config = {};
 
 /**
  * Names of all the builtin gestures of Hammer
@@ -56,13 +56,36 @@ export const config = {}
  * @type {Array}
  */
 export const gestures = [
-  'pan', 'panstart', 'panmove', 'panend', 'pancancel', 'panleft', 'panright', 'panup', 'pandown',
-  'pinch', 'pinchstart', 'pinchmove', 'pinchend', 'pinchcancel', 'pinchin', 'pinchout',
-  'press', 'pressup',
-  'rotate', 'rotatestart', 'rotatemove', 'rotateend', 'rotatecancel',
-  'swipe', 'swipeleft', 'swiperight', 'swipeup', 'swipedown',
-  'tap'
-]
+  'pan',
+  'panstart',
+  'panmove',
+  'panend',
+  'pancancel',
+  'panleft',
+  'panright',
+  'panup',
+  'pandown',
+  'pinch',
+  'pinchstart',
+  'pinchmove',
+  'pinchend',
+  'pinchcancel',
+  'pinchin',
+  'pinchout',
+  'press',
+  'pressup',
+  'rotate',
+  'rotatestart',
+  'rotatemove',
+  'rotateend',
+  'rotatecancel',
+  'swipe',
+  'swipeleft',
+  'swiperight',
+  'swipeup',
+  'swipedown',
+  'tap',
+];
 
 /**
  * Maps the gestures to their "main gesture" (the name of the recognizer)
@@ -97,9 +120,10 @@ export const gestureMap = {
   swiperight: 'swipe',
   swipeup: 'swipe',
   swipedown: 'swipe',
-  tap: 'tap'
-}
+  tap: 'tap',
+};
 
-export const normalizeGesture = name => gestureMap[name]
+export const normalizeGesture = (name) => gestureMap[name];
 
-export const objectHasArrayValues = value => typeof value === 'object' && Object.values(value).every(any => Array.isArray(any))
+export const objectHasArrayValues = (value) =>
+  typeof value === 'object' && Object.values(value).every((any) => Array.isArray(any));

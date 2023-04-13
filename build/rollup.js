@@ -1,4 +1,5 @@
 const buble = require('rollup-plugin-buble');
+const vuePlugin = require('rollup-plugin-vue');
 const commonjs = require('rollup-plugin-commonjs');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const cleanup = require('rollup-plugin-cleanup');
@@ -13,9 +14,10 @@ const bubbleConfig = {
 rollup({
   entry: path.resolve(__dirname, '../src/index.js'),
   sourceMap: true,
-  external: ['hammerjs'],
+  external: ['hammerjs', 'vue'],
 
   plugins: [
+    vuePlugin(/* options */),
     buble(bubbleConfig),
     nodeResolve({ jsnext: true, main: true }),
     commonjs(),

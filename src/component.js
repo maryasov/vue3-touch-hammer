@@ -1,16 +1,7 @@
-import Hammer  from 'hammerjs'
-
-import {
-  createProp,
-  capitalize,
-  guardDirections,
-  normalizeGesture,
-  objectHasArrayValues,
-} from './utils'
-
-import {
-  customEvents
-} from './events'
+import Hammer from 'hammerjs';
+import { h } from 'vue';
+import { customEvents } from './events';
+import { capitalize, createProp, guardDirections, normalizeGesture, objectHasArrayValues } from './utils';
 
 export default {
   props: {
@@ -28,28 +19,38 @@ export default {
       validate: objectHasArrayValues,
     },
     requireFailure: {
-      type: Object, default: () => ({}),
+      type: Object,
+      default: () => ({}),
       validate: objectHasArrayValues,
     },
     enabled: {
       default: true,
       type: [Boolean, Object],
-    }
+    },
   },
 
   mounted() {
+    this._events = Object.keys(this.$attrs)
+      .map((el, id) => {
+        if (el.startsWith('on')) {
+          return el.replace(/(^on)/gi, '').toLowerCase();
+        }
+      })
+      .filter(function (element) {
+        return element !== undefined;
+      });
     if (!this.$isServer) {
-      this.hammer = new Hammer.Manager(this.$el, this.options)
-      this.recognizers = {}
-      this.setupRecognizers()
-      this.setupRecognizerDependencies()
-      this.updateEnabled(this.enabled)
+      this.hammer = new Hammer.Manager(this.$el, this.options);
+      this.recognizers = {};
+      this.setupRecognizers();
+      this.setupRecognizerDependencies();
+      this.updateEnabled(this.enabled);
     }
   },
 
   destroyed() {
     if (!this.$isServer) {
-      this.hammer.destroy()
+      this.hammer.destroy();
     }
   },
 
@@ -57,43 +58,42 @@ export default {
     enabled: {
       deep: true,
       handler(...args) {
-        this.updateEnabled(...args)
-      }
-    }
+        this.updateEnabled(...args);
+      },
+    },
   },
 
   methods: {
-
     /**
      * Register recognizers for any event that matches
      * a defined gesture or custom event.
      */
-    setupRecognizers()  {
-      for (let gesture of Object.keys(this._events)) {
+    setupRecognizers() {
+      for (let gesture of this._events) {
         if (normalizeGesture(gesture)) {
-          this.addEvent(gesture)
+          this.addEvent(gesture);
 
-          gesture = normalizeGesture(gesture)
-          const options = Object.assign({}, this.$options.config[gesture] || {}, this[gesture])
-          this.addRecognizer(gesture, options)
+          gesture = normalizeGesture(gesture);
+          const options = Object.assign({}, this.$options.config[gesture] || {}, this[gesture]);
+          this.addRecognizer(gesture, options);
         } else if (customEvents(gesture)) {
-          this.addEvent(gesture)
+          this.addEvent(gesture);
 
-          const options = Object.assign({}, customEvents(gesture), this[gesture])
-          this.addRecognizer(gesture, options, { mainGesture: options.type })
+          const options = Object.assign({}, customEvents(gesture), this[gesture]);
+          this.addRecognizer(gesture, options, { mainGesture: options.type });
         } else {
-          throw new Error(`Unknown gesture: ${gesture}`)
+          throw new Error(`Unknown gesture: ${gesture}`);
         }
       }
     },
 
     setupRecognizerDependencies() {
       for (const [key, value] of Object.entries(this.recognizeWith)) {
-        this.recognizers[key] && this.recognizers[key].recognizeWith(value.map(name => this.recognizers[name]))
+        this.recognizers[key] && this.recognizers[key].recognizeWith(value.map((name) => this.recognizers[name]));
       }
 
       for (const [key, value] of Object.entries(this.requireFailure)) {
-        this.recognizers[key] && this.recognizers[key].requireFailure(value.map(name => this.recognizers[name]))
+        this.recognizers[key] && this.recognizers[key].requireFailure(value.map((name) => this.recognizers[name]));
       }
     },
 
@@ -107,13 +107,13 @@ export default {
     addRecognizer: function addRecognizer(gesture, options, { mainGesture } = {}) {
       // create recognizer, e.g. new Hammer['Swipe'](options)
       if (!this.recognizers[gesture]) {
-        this.recognizers[gesture] = new Hammer[capitalize(mainGesture || gesture)](guardDirections(options))
-        this.hammer.add(this.recognizers[gesture])
+        this.recognizers[gesture] = new Hammer[capitalize(mainGesture || gesture)](guardDirections(options));
+        this.hammer.add(this.recognizers[gesture]);
       }
     },
 
     addEvent(gesture) {
-      this.hammer.on(gesture, e => this.$emit(gesture, e))
+      this.hammer.on(gesture, (e) => this.$emit(gesture, e));
     },
 
     /**
@@ -125,60 +125,60 @@ export default {
      */
     updateEnabled: function updateEnabled(newVal, oldVal) {
       if (newVal === true) {
-        this.enableAll()
+        this.enableAll();
       } else if (newVal === false) {
-        this.disableAll()
+        this.disableAll();
       } else if (typeof newVal === 'object') {
         for (const [event, status] of Object.entries(newVal)) {
-          this.recognizers[event] && status ? this.enable(event) : this.disable(event)
+          this.recognizers[event] && status ? this.enable(event) : this.disable(event);
         }
       }
     },
 
     enable(gesture) {
-      const recognizer = this.recognizers[gesture]
+      const recognizer = this.recognizers[gesture];
       if (!recognizer.options.enable) {
-        recognizer.set({ enable: true })
+        recognizer.set({ enable: true });
       }
     },
 
     disable(gesture) {
-      const recognizer = this.recognizers[gesture]
+      const recognizer = this.recognizers[gesture];
       if (recognizer.options.enable) {
-        recognizer.set({ enable: false })
+        recognizer.set({ enable: false });
       }
     },
 
     toggle(gesture) {
-      const recognizer = this.recognizers[gesture]
+      const recognizer = this.recognizers[gesture];
 
       if (recognizer) {
-        recognizer.options.enable ? this.disable(gesture) : this.enable(gesture)
+        recognizer.options.enable ? this.disable(gesture) : this.enable(gesture);
       }
     },
 
     enableAll() {
-      this.setAll({ enable: true })
+      this.setAll({ enable: true });
     },
 
     disableAll() {
-      this.setAll({ enable: false })
+      this.setAll({ enable: false });
     },
 
     setAll({ enable }) {
       for (const recognizer of Object.values(this.recognizers)) {
         if (recognizer.options.enable !== enable) {
-          recognizer.set({ enable })
+          recognizer.set({ enable });
         }
       }
     },
 
     isEnabled(gesture) {
-      return this.recognizers[gesture] && this.recognizers[gesture].options.enable
-    }
+      return this.recognizers[gesture] && this.recognizers[gesture].options.enable;
+    },
   },
 
-  render(h) {
-    return h(this.tag, {}, this.$slots.default)
-  }
-}
+  render() {
+    return h(this.tag, {}, this.$slots.default());
+  },
+};

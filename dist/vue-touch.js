@@ -1,8 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('hammerjs')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'hammerjs'], factory) :
-  (factory((global.VueTouch = global.VueTouch || {}),global.Hammer));
-}(this, (function (exports,Hammer) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('hammerjs'), require('vue')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'hammerjs', 'vue'], factory) :
+  (factory((global.VueTouch = global.VueTouch || {}),global.Hammer,global.vue));
+}(this, (function (exports,Hammer,vue) { 'use strict';
 
 Hammer = 'default' in Hammer ? Hammer['default'] : Hammer;
 
@@ -10,12 +10,12 @@ function createProp() {
   return {
     type: Object,
     default: function () {
-      return {}
-    }
-  }
+      return {};
+    },
+  };
 }
 function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1)
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 var directions = ['up', 'down', 'left', 'right', 'horizontal', 'vertical', 'all'];
 function guardDirections(options) {
@@ -28,7 +28,7 @@ function guardDirections(options) {
       console.warn('[vue-touch] invalid direction: ' + dir);
     }
   }
-  return options
+  return options;
 }
 
 
@@ -61,13 +61,13 @@ var gestureMap = {
   swiperight: 'swipe',
   swipeup: 'swipe',
   swipedown: 'swipe',
-  tap: 'tap'
+  tap: 'tap',
 };
 var normalizeGesture = function (name) { return gestureMap[name]; };
 var objectHasArrayValues = function (value) { return typeof value === 'object' && Object.values(value).every(function (any) { return Array.isArray(any); }); };
 
 var events = {};
-var customEvents = function (name) { return name === undefined ? events : events[name]; };
+var customEvents = function (name) { return (name === undefined ? events : events[name]); };
 var register = function (event, options) {
   if ( options === void 0 ) options = {};
   options.event = event;
@@ -93,15 +93,25 @@ var Component = {
       validate: objectHasArrayValues,
     },
     requireFailure: {
-      type: Object, default: function () { return ({}); },
+      type: Object,
+      default: function () { return ({}); },
       validate: objectHasArrayValues,
     },
     enabled: {
       default: true,
       type: [Boolean, Object],
-    }
+    },
   },
   mounted: function mounted() {
+    this._events = Object.keys(this.$attrs)
+      .map(function (el, id) {
+        if (el.startsWith('on')) {
+          return el.replace(/(^on)/gi, '').toLowerCase();
+        }
+      })
+      .filter(function (element) {
+        return element !== undefined;
+      });
     if (!this.$isServer) {
       this.hammer = new Hammer.Manager(this.$el, this.options);
       this.recognizers = {};
@@ -123,13 +133,13 @@ var Component = {
         while ( len-- ) args[ len ] = arguments[ len ];
         (ref = this).updateEnabled.apply(ref, args);
         var ref;
-      }
-    }
+      },
+    },
   },
   methods: {
-    setupRecognizers: function setupRecognizers()  {
+    setupRecognizers: function setupRecognizers() {
       var this$1 = this;
-      for (var i = 0, list = Object.keys(this$1._events); i < list.length; i += 1) {
+      for (var i = 0, list = this$1._events; i < list.length; i += 1) {
         var gesture = list[i];
         if (normalizeGesture(gesture)) {
           this$1.addEvent(gesture);
@@ -141,7 +151,7 @@ var Component = {
           var options$1 = Object.assign({}, customEvents(gesture), this$1[gesture]);
           this$1.addRecognizer(gesture, options$1, { mainGesture: options$1.type });
         } else {
-          throw new Error(("Unknown gesture: " + gesture))
+          throw new Error(("Unknown gesture: " + gesture));
         }
       }
     },
@@ -222,17 +232,17 @@ var Component = {
       }
     },
     isEnabled: function isEnabled(gesture) {
-      return this.recognizers[gesture] && this.recognizers[gesture].options.enable
-    }
+      return this.recognizers[gesture] && this.recognizers[gesture].options.enable;
+    },
   },
-  render: function render(h) {
-    return h(this.tag, {}, this.$slots.default)
-  }
+  render: function render() {
+    return vue.h(this.tag, {}, this.$slots.default());
+  },
 };
 
 var install = function (app, options) {
   if ( options === void 0 ) options = {};
-  if (install.installed === true) { return }
+  if (install.installed === true) { return; }
   install.installed = true;
   Component.config = install.config;
   app.component(options.name || 'v-touch', Component);
@@ -241,18 +251,18 @@ install.config = {};
 var registerCustomEvent = function (event, options) {
   if (install.installed) {
     console.warn(("\n      [vue-touch]: Custom Event '" + event + "' couldn't be added to vue-touch.\n      Custom Events have to be registered before installing the plugin.\n      "));
-    return
+    return;
   }
   register(event, options);
 };
 var plugin = {
   install: install,
+  registerCustomEvent: registerCustomEvent,
 };
 
 exports['default'] = plugin;
 exports.VTouch = Component;
 exports.customEvents = customEvents;
-exports.registerCustomEvent = registerCustomEvent;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
